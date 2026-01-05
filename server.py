@@ -59,9 +59,14 @@ def showSummary():
 
     """
 
-    club = [club for club in clubs if club['email'] == request.form['email']][0]
-    return render_template('welcome.html',club=club,competitions=competitions)
+    email = request.form['email']
+    matching_clubs = [club for club in clubs if club['email'] == email]
 
+    if not matching_clubs:
+        flash("Email address not found. Please try again.")
+        return redirect(url_for('index'))
+    club = matching_clubs[0]
+    return render_template('welcome.html',club = club, competitions = competitions)
 
 @app.route('/book/<competition>/<club>')
 
