@@ -1,7 +1,11 @@
-bin
-include
-lib
-.Python
-tests/
+venv/
+__pycache__/
+*.pyc
+.env
 .envrc
-__pycache__
+.flaskenv
+coverage/
+htmlcov/
+.pytest_cache/
+.vscode/
+.idea/
