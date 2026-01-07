@@ -114,7 +114,7 @@ def purchasePlaces():
     #check: placesRequired can't exceed remainig competition spots
 
     if placesRequired > available_places:
-        flash ("Not enough places available in the competition.")
+        flash ("You do not have enough points to book these places.")
         return render_template('booking.html', club = club, competition = competition)
     
     # all valid : deduct points and competition places
