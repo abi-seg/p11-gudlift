@@ -102,33 +102,10 @@ def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     placesRequired = int(request.form['places'])
-<<<<<<< Updated upstream
-    
-    #new points check (Prevent booking if not enough points)
-    available_points = int(club['points'])
-=======
 
     available_points = int(club['points'])
     available_places = int(competition['numberOfPlaces'])
 
-   
-
-
-    if placesRequired > available_points:
-        flash("You do not have enough points to book these places.")
-        return render_template('booking.html', club=club, competition=competition)
-
-    if placesRequired > available_places:
-        flash("Not enough places available in the competition.")
-        return render_template('booking.html', club=club, competition=competition)
-
-    # Validation passed
-    club['points'] = str(available_points - placesRequired)
-    competition['numberOfPlaces'] = str(available_places - placesRequired)
-
-    flash('Great - booking complete!')
-    return render_template('welcome.html', club=club, competitions=competitions)
->>>>>>> Stashed changes
 
     if placesRequired > available_points:
         flash ("You do not have enough points to book these places.")
@@ -136,7 +113,7 @@ def purchasePlaces():
     
     #check: placesRequired can't exceed remainig competition spots
 
-    if placesRequired > int(competition['numberOfPlaces']):
+    if placesRequired > available_places:
         flash ("Not enough places available in the competition.")
         return render_template('booking.html', club = club, competition = competition)
     
