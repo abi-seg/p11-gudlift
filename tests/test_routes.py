@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from server import app,clubs
-
+from datetime import datetime
 import pytest
 
 @pytest.fixture
@@ -45,3 +45,17 @@ def test_points_deducted_after_booking(client):
     # Check that the success message is displayed
     assert b"Great - booking complete!" in response.data
 
+def test_past_competitions_not_shown(client):
+    """
+     Test that past competitions are not shown on the welcome page after login.
+
+    """
+    #simulate login with valid club email
+    response = client.post('/showSummary', data = {
+        'email': 'john@simplylift.co'
+    }, follow_redirects = True)
+    #competition in the past
+    assert b"Spring Festival" not in response.data
+
+    #checks future competition shows up
+    assert b"Fall Classic" in response.data
