@@ -34,6 +34,8 @@ app.secret_key = 'something_special' # Required for using flash messages
 competitions = loadCompetitions() # Load data once at startup
 clubs = loadClubs()
 
+
+
 @app.route('/') # Home page route
 def index():
 
@@ -149,3 +151,7 @@ def logout():
      """
     
     return redirect(url_for('index'))
+
+@app.route('/leaderboard')
+def leaderboard():
+    return render_template('leaderboard.html', clubs = clubs)

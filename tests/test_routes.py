@@ -74,3 +74,14 @@ def test_booking_more_than_12_places(client):
         }, follow_redirects = True)
 
         assert b"You cannot book more than 12 places per competition." in response.data
+
+def test_leaderboard_page_shows_clubs(client):
+    """
+    Test that the public leaderboard page shows club names and points.
+    """
+    response = client.get('/leaderboard')
+    
+    assert response.status_code == 200
+    assert b'Simply Lift' in response.data  # Club name
+    assert b'Iron Temple' in response.data 
+    assert b'She Lifts' in response.data
