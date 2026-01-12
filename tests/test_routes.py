@@ -60,13 +60,13 @@ def test_past_competitions_not_shown(client):
     #checks future competition shows up
     assert b"Fall Classic" in response.data
 
-    def test_booking_more_than_12_places(client):
+def test_booking_more_than_12_places(client):
 
         """
         Booking more than 12 places should fail with an error.
 
         """
-        response = client.post('/puchasePlaces', data = {
+        response = client.post('/purchasePlaces', data = {
             'competition' : 'Fall Classic',
             'club' : 'Simply Lift',
             'places' : 13
