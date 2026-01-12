@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Classement des Clubs</title>
+</head>
+<body>
+    <h1>Classement – Points des clubs</h1>
+    <table border="1">
+        <tr>
+            <th>Nom du Club</th>
+            <th>Points disponibles</th>
+        </tr>
+        {% for club in clubs %}
+        <tr>
+            <td>{{ club['name'] }}</td>
+            <td>{{ club['points'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
