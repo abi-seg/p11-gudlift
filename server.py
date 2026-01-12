@@ -111,6 +111,11 @@ def purchasePlaces():
     available_points = int(club['points'])
     available_places = int(competition['numberOfPlaces'])
 
+    #check: limit of 12 places max
+    if placesRequired > 12:
+        flash ("You cannot book more than 12 places per competition.")
+        return render_template('booking.html', club = club, competition = competition)
+
 
     if placesRequired > available_points:
         flash ("You do not have enough points to book these places.")
@@ -119,7 +124,7 @@ def purchasePlaces():
     #check: placesRequired can't exceed remainig competition spots
 
     if placesRequired > available_places:
-        flash ("You do not have enough points to book these places.")
+        flash ("There are not enough places left in this competition.")
         return render_template('booking.html', club = club, competition = competition)
     
     # all valid : deduct points and competition places
