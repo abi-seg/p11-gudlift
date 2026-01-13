@@ -12,6 +12,8 @@ def client():
     with app.test_client() as client:
         yield client
 
+# Test login with invalid email address
+
 def test_invalid_login_email(client):
 
     """
@@ -85,3 +87,60 @@ def test_leaderboard_page_shows_clubs(client):
     assert b'Simply Lift' in response.data  # Club name
     assert b'Iron Temple' in response.data 
     assert b'She Lifts' in response.data
+
+# Test booking page (valid club + competition)
+def test_booking_page_valid(client):
+     response = client.get('/book/Fall Classic/Simply Lift', follow_redirects = True)
+     assert response.status_code == 200
+     assert b'How many places?' in response.data
+
+# Test: booking fails with insufficient club points
+
+def test_booking_not_enough_points(client):
+     response = client.post('/purchasePlaces', data = {
+          'competition': 'Fall Classic',
+          'club': 'Iron Temple', # only 4 points in JSON
+          'places': 5
+     }, follow_redirects = True)
+     assert b'You do not have enough points to book these places.' in response.data
+
+# Test: Booking fails if not enough competition places
+def test_booking_exceeds_competition_spots(client):
+     response = client.post('/purchasePlaces', data = {
+          'competition': 'Mini Comp',
+          'club': 'Simply Lift',
+          'places': '5' # more than 3
+     }, follow_redirects = True)
+     assert b'There are not enough places left in this competition.' in response.data
+
+# Test: Booking fails if invalid club or competition
+def test_booking_invalid_club_or_competition(client):
+     response = client.get('/book/FakeCompetition/FakeClub', follow_redirects = True)
+     assert response.status_code == 200
+     assert b"Something went wrong" in response.data
+
+# Test: Successful booking shows flash confirmation
+def test_successful_booking_shows_confirmation(client):
+     # visiting booking page to set necessary context
+     client.get('/book/Fall Classic/Simply Lift')
+     #submitting the booking form
+     response = client.post('/purchasePlaces', data = {
+          'competition': 'Fall Classic',
+          'club': 'Simply Lift',
+          'places': '1'
+     }, follow_redirects = True)
+     assert response.status_code == 200
+     assert b"Great - booking complete!" in response.data
+     print(response.data.decode())
+
+# Test: Access to root home page
+def test_homepage_route(client):
+     response = client.get('/')
+     assert response.status_code == 200
+     assert b"View Club Leaderboard" in response.data
+
+# Test: Logout redirects to home
+def tests_logout_redirects_to_home(client):
+     response = client.get('/logout', follow_redirects = True)
+     assert response.status_code == 200
+     assert b"View Club Leaderboard" in response.data
