@@ -88,8 +88,8 @@ def book(competition,club):
         rendered HTML (booking.html or welconme.html)
     """
 
-    foundClub = [c for c in clubs if c['name'] == club][0]
-    foundCompetition = [c for c in competitions if c['name'] == competition][0]
+    foundClub = next((c for c in clubs if c['name'] == club), None) # To avoid index error when fake club/competition is used in the test.
+    foundCompetition = next((c for c in competitions if c['name'] == competition), None)
     if foundClub and foundCompetition:
         return render_template('booking.html',club=foundClub,competition=foundCompetition)
     else:
@@ -106,6 +106,7 @@ def purchasePlaces():
     Returns:
         rendered HTML (welcome.html) with flash message
     """
+    
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     placesRequired = int(request.form['places'])
@@ -117,7 +118,6 @@ def purchasePlaces():
     if placesRequired > 12:
         flash ("You cannot book more than 12 places per competition.")
         return render_template('booking.html', club = club, competition = competition)
-
 
     if placesRequired > available_points:
         flash ("You do not have enough points to book these places.")
@@ -136,7 +136,7 @@ def purchasePlaces():
     flash('Great - booking complete!')
     return render_template('welcome.html', club = club)
 
-# TODO: Add route for points display
+
 
 
 @app.route('/logout')
@@ -155,3 +155,4 @@ def logout():
 @app.route('/leaderboard')
 def leaderboard():
     return render_template('leaderboard.html', clubs = clubs)
+
