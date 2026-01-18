@@ -154,5 +154,7 @@ def logout():
 
 @app.route('/leaderboard')
 def leaderboard():
-    return render_template('leaderboard.html', clubs = clubs)
+    # sort clubs by their points in descending order
+    sorted_clubs = sorted(clubs, key=lambda c: int(c['points']), reverse = True)
+    return render_template('leaderboard.html', clubs = sorted_clubs)
 
