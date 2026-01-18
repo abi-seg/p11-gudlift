@@ -1,6 +1,6 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
-
+from datetime import datetime
 
 def loadClubs():
 
@@ -34,6 +34,8 @@ app.secret_key = 'something_special' # Required for using flash messages
 competitions = loadCompetitions() # Load data once at startup
 clubs = loadClubs()
 
+
+
 @app.route('/') # Home page route
 def index():
 
@@ -59,9 +61,19 @@ def showSummary():
 
     """
 
-    club = [club for club in clubs if club['email'] == request.form['email']][0]
-    return render_template('welcome.html',club=club,competitions=competitions)
+    email = request.form['email']
+    matching_clubs = [club for club in clubs if club['email'] == email]
 
+    if not matching_clubs:
+        flash("Email address not found. Please try again.")
+        return redirect(url_for('index'))
+    club = matching_clubs[0]
+    upcoming_competitions = [
+        comp for comp in competitions
+    if datetime.strptime(comp['date'], '%Y-%m-%d %H:%M:%S') > datetime.now()
+]
+
+    return render_template('welcome.html', club=club, competitions=upcoming_competitions)
 
 @app.route('/book/<competition>/<club>')
 
@@ -76,8 +88,8 @@ def book(competition,club):
         rendered HTML (booking.html or welconme.html)
     """
 
-    foundClub = [c for c in clubs if c['name'] == club][0]
-    foundCompetition = [c for c in competitions if c['name'] == competition][0]
+    foundClub = next((c for c in clubs if c['name'] == club), None) # To avoid index error when fake club/competition is used in the test.
+    foundCompetition = next((c for c in competitions if c['name'] == competition), None)
     if foundClub and foundCompetition:
         return render_template('booking.html',club=foundClub,competition=foundCompetition)
     else:
@@ -85,26 +97,46 @@ def book(competition,club):
         return render_template('welcome.html', club=club, competitions=competitions)
 
 
-@app.route('/purchasePlaces',methods=['POST'])
+@app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
-
     """
-        Handle booking submission.
-        Deducts requested number of places from competition, and displays confirmation.
-     Returns:
+    Handle booking submission.
+    Deducts requested number of places from competition, and displays confirmation.
+
+    Returns:
         rendered HTML (welcome.html) with flash message
-
     """
-
+    
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     placesRequired = int(request.form['places'])
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired # validation to be added
-    flash('Great-booking complete!')
-    return render_template('welcome.html', club=club, competitions=competitions)
+
+    available_points = int(club['points'])
+    available_places = int(competition['numberOfPlaces'])
+
+    #check: limit of 12 places max
+    if placesRequired > 12:
+        flash ("You cannot book more than 12 places per competition.")
+        return render_template('booking.html', club = club, competition = competition)
+
+    if placesRequired > available_points:
+        flash ("You do not have enough points to book these places.")
+        return render_template('booking.html', club = club, competition = competition)
+    
+    #check: placesRequired can't exceed remainig competition spots
+
+    if placesRequired > available_places:
+        flash ("There are not enough places left in this competition.")
+        return render_template('booking.html', club = club, competition = competition)
+    
+    # all valid : deduct points and competition places
+    club ['points'] = str(available_points - placesRequired)
+    competition['numberOfPlaces'] = str(int(competition['numberOfPlaces']) - placesRequired)
+
+    flash('Great - booking complete!')
+    return render_template('welcome.html', club = club)
 
 
-# TODO: Add route for points display
 
 
 @app.route('/logout')
@@ -119,3 +151,8 @@ def logout():
      """
     
     return redirect(url_for('index'))
+
+@app.route('/leaderboard')
+def leaderboard():
+    return render_template('leaderboard.html', clubs = clubs)
+
